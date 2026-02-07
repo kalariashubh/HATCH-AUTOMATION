@@ -1,4 +1,4 @@
-﻿using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -14,7 +14,6 @@ namespace hatch_automation.Commands
             var doc = Application.DocumentManager.MdiActiveDocument;
             var ed = doc.Editor;
 
-            // ✅ Select boundary
             PromptEntityOptions peo =
                 new PromptEntityOptions("\nSelect a closed boundary: ");
 
@@ -29,12 +28,14 @@ namespace hatch_automation.Commands
 
             ObjectId boundaryId = result.ObjectId;
 
-            // ✅ Choose direction
+            // ⭐ UPDATED OPTIONS
             PromptKeywordOptions dirOptions =
                 new PromptKeywordOptions("\nChoose line direction");
 
             dirOptions.Keywords.Add("Horizontal");
             dirOptions.Keywords.Add("Vertical");
+            dirOptions.Keywords.Add("Both");
+
             dirOptions.AllowNone = false;
 
             var dirResult = ed.GetKeywords(dirOptions);
@@ -42,10 +43,8 @@ namespace hatch_automation.Commands
             if (dirResult.Status != PromptStatus.OK)
                 return;
 
-            double angle =
-                dirResult.StringResult == "Horizontal" ? 0 : 90;
+            string direction = dirResult.StringResult;
 
-            // ✅ Enter spacing
             PromptDoubleOptions spacingOptions =
                 new PromptDoubleOptions("\nEnter spacing (drawing units): ");
 
@@ -59,7 +58,7 @@ namespace hatch_automation.Commands
 
             double spacing = spacingResult.Value;
 
-            HatchService.ProcessBoundary(boundaryId, angle, spacing);
+            HatchService.ProcessBoundary(boundaryId, direction, spacing);
         }
     }
 }
