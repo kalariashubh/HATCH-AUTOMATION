@@ -78,11 +78,7 @@ Steps:
 2. Choose line direction (Horizontal / Vertical / Both).
 3. Enter spacing (drawing units).
 
-The plugin will create interior lines and export JSON to:
-
-```
-C:\Temp\line_lengths.json
-```
+The plugin will create interior lines and export JSON.
 
 ---
 
@@ -109,22 +105,3 @@ C:\Temp\line_lengths.json
 
 ---
 
-## Future Enhancements
-
-* Smart direction detection
-* Total length calculation
-* Hole detection
-* API integration
-* Automatic execution on boundary creation
-
----
-
-## License
-
-Add your preferred license (MIT, Apache, Proprietary, etc.)
-
----
-
-## Author
-
-Developed for advanced AutoCAD automation and construction-tech workflows.
