@@ -1,4 +1,4 @@
-﻿namespace hatch_automation.Services
+namespace hatch_automation.Services
 {
     public class LineData
     {
