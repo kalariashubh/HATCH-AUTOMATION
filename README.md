@@ -1,5 +1,5 @@
 # AutoCAD Layout & Quantity Extraction Plugin
-
+ 
 ## Overview
 
 A professional AutoCAD .NET plugin that generates evenly spaced interior lines inside a closed polyline and exports their lengths as structured JSON for quantity estimation workflows.
