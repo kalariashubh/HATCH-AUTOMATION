@@ -1,4 +1,4 @@
-﻿using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
@@ -8,13 +8,14 @@ namespace hatch_automation.Services
 {
     public static class HatchService
     {
-        public static void ProcessBoundary(ObjectId boundaryId, double angle, double spacing)
+        public static void ProcessBoundary(ObjectId boundaryId, string direction, double spacing)
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
             var db = doc.Database;
             var ed = doc.Editor;
 
-            List<LineData> lines = new List<LineData>();
+            List<LineData> horizontalLines = new List<LineData>();
+            List<LineData> verticalLines = new List<LineData>();
 
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
@@ -27,12 +28,8 @@ namespace hatch_automation.Services
                     return;
                 }
 
-                // ✅ Auto close polyline
                 if (!boundary.Closed)
-                {
                     boundary.Closed = true;
-                    ed.WriteMessage("\nPolyline was open — auto closed.");
-                }
 
                 BlockTable bt =
                     tr.GetObject(db.BlockTableId, OpenMode.ForRead) as BlockTable;
@@ -41,7 +38,6 @@ namespace hatch_automation.Services
                     tr.GetObject(bt[BlockTableRecord.ModelSpace],
                     OpenMode.ForWrite) as BlockTableRecord;
 
-                // ✅ Get boundary extents
                 Extents3d ext = boundary.GeometricExtents;
 
                 double minX = ext.MinPoint.X;
@@ -49,11 +45,11 @@ namespace hatch_automation.Services
                 double minY = ext.MinPoint.Y;
                 double maxY = ext.MaxPoint.Y;
 
-                bool horizontal = angle == 0;
-
-                // 🔥 CORE ENGINE
-                if (horizontal)
+                // ⭐ Horizontal
+                if (direction == "Horizontal" || direction == "Both")
                 {
+                    ed.WriteMessage("\n\n--- Generating Horizontal Lines ---");
+
                     for (double y = minY; y <= maxY; y += spacing)
                     {
                         Line testLine = new Line(
@@ -69,11 +65,15 @@ namespace hatch_automation.Services
                             System.IntPtr.Zero,
                             System.IntPtr.Zero);
 
-                        CreateInteriorLines(pts, btr, tr, lines, ed);
+                        CreateInteriorLines(pts, btr, tr, horizontalLines, ed, "H");
                     }
                 }
-                else
+
+                // ⭐ Vertical
+                if (direction == "Vertical" || direction == "Both")
                 {
+                    ed.WriteMessage("\n\n--- Generating Vertical Lines ---");
+
                     for (double x = minX; x <= maxX; x += spacing)
                     {
                         Line testLine = new Line(
@@ -89,31 +89,30 @@ namespace hatch_automation.Services
                             System.IntPtr.Zero,
                             System.IntPtr.Zero);
 
-                        CreateInteriorLines(pts, btr, tr, lines, ed);
+                        CreateInteriorLines(pts, btr, tr, verticalLines, ed, "V");
                     }
                 }
 
-                JsonService.Export(lines);
+                JsonService.Export(horizontalLines, verticalLines);
 
                 ed.WriteMessage(
-                    $"\n\nSUCCESS ✅ Created {lines.Count} interior lines.");
+                    $"\n\nSUCCESS ✅ Horizontal: {horizontalLines.Count} | Vertical: {verticalLines.Count}");
 
                 tr.Commit();
             }
         }
 
-        // ⭐ Handles intersections safely
         private static void CreateInteriorLines(
             Point3dCollection pts,
             BlockTableRecord btr,
             Transaction tr,
             List<LineData> lines,
-            Editor ed)
+            Editor ed,
+            string prefix)
         {
             if (pts.Count < 2)
                 return;
 
-            // Pair intersections
             for (int i = 0; i < pts.Count - 1; i += 2)
             {
                 Line inside = new Line(pts[i], pts[i + 1]);
@@ -122,11 +121,10 @@ namespace hatch_automation.Services
                 tr.AddNewlyCreatedDBObject(inside, true);
 
                 double length = inside.Length;
-
                 int lineNumber = lines.Count + 1;
 
                 ed.WriteMessage(
-                    $"\nLine {lineNumber} Length = {length:F2}");
+                    $"\n{prefix}-Line {lineNumber} Length = {length:F2}");
 
                 lines.Add(new LineData
                 {
