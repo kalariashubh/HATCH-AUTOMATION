@@ -19,17 +19,22 @@ namespace hatch_automation.Services
 
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
-                Polyline boundary =
-                    tr.GetObject(boundaryId, OpenMode.ForWrite) as Polyline;
+                // ✅ UPDATED — use Curve instead of Polyline
+                Curve boundary =
+                    tr.GetObject(boundaryId, OpenMode.ForRead) as Curve;
 
                 if (boundary == null)
                 {
-                    ed.WriteMessage("\nOnly closed polylines supported.");
+                    ed.WriteMessage("\nUnsupported boundary type.");
                     return;
                 }
 
+                // ✅ Works for both circle & polyline
                 if (!boundary.Closed)
-                    boundary.Closed = true;
+                {
+                    ed.WriteMessage("\nBoundary must be closed.");
+                    return;
+                }
 
                 BlockTable bt =
                     tr.GetObject(db.BlockTableId, OpenMode.ForRead) as BlockTable;
