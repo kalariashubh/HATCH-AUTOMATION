@@ -17,8 +17,12 @@ namespace hatch_automation.Commands
             PromptEntityOptions peo =
                 new PromptEntityOptions("\nSelect a closed boundary: ");
 
-            peo.SetRejectMessage("\nObject must be a closed polyline.");
+            peo.SetRejectMessage("\nObject must be a closed polyline or circle.");
+
+            // ✅ UPDATED — allow circles
             peo.AddAllowedClass(typeof(Polyline), true);
+            peo.AddAllowedClass(typeof(Circle), true);
+
             peo.AllowObjectOnLockedLayer = true;
 
             var result = ed.GetEntity(peo);
@@ -28,7 +32,7 @@ namespace hatch_automation.Commands
 
             ObjectId boundaryId = result.ObjectId;
 
-            // ⭐ UPDATED OPTIONS
+            // Direction selection
             PromptKeywordOptions dirOptions =
                 new PromptKeywordOptions("\nChoose line direction");
 
@@ -45,6 +49,7 @@ namespace hatch_automation.Commands
 
             string direction = dirResult.StringResult;
 
+            // Spacing input
             PromptDoubleOptions spacingOptions =
                 new PromptDoubleOptions("\nEnter spacing (drawing units): ");
 
