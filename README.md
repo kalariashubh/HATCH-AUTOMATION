@@ -16,12 +16,12 @@ Ideal for:
 
 ## Features
 
-✔ Generate horizontal, vertical, or both-direction interior lines
-✔ Accurate geometry (no hatch dependency)
-✔ Automatic length aggregation with quantities
-✔ Command-line length display
-✔ Structured JSON export
-✔ Transaction-safe and production-ready architecture
+* Generate horizontal, vertical, or both-direction interior lines
+* Accurate geometry (no hatch dependency)
+* Automatic length aggregation with quantities
+* Command-line length display
+* Structured JSON export
+* Transaction-safe and production-ready architecture
 
 ---
 
